@@ -8,6 +8,10 @@ const msgString = 'absasdagfadgadsfdfdsf';
 let publicKey;
 let privateKey;
 
+const TEST_SK = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+const DE_COMPRESSED = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
+const COMPRESSED = '02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936'
+
 beforeAll(() => {
     // 生成密钥对
     let keypair = sm2.generateKeyPairHex();
@@ -107,25 +111,27 @@ test('sign data and verify sign', () => {
 
 
 test('compress', () => {
-    let sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+    let sk = TEST_SK
     let beforeCompress = sm2.getPKFromSK(sk);
     let compressed = sm2.compress(beforeCompress);
-    expect(compressed).toBe('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936');
+    expect(compressed).toBe(COMPRESSED);
 })
 
 
 test('deCompress', () => {
-    let deCompressed = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
-    expect(sm2.deCompress('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936')).toBe(deCompressed)
+    expect(sm2.deCompress(COMPRESSED)).toBe(DE_COMPRESSED)
 })
 
+test('sign with user-id', () => {
+    console.log('sig =' + sm2.doSignature('123', TEST_SK, {userId: 'userid@soie-chain.com', der: false, hash: true}))
+    console.log('sig =' + sm2.doSignature(['1', '2', '3'].map(x => x.charCodeAt(0)), TEST_SK, {userId: 'userid@soie-chain.com', der: false, hash: true}))
+})
 
 test('verifySign', () => {
-    let deCompressed = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
-    let verifyResult6False = sm2.doVerifySignature("123", "344857fe641c9fd3825a389fc85ca8bcab694f199fe155022e17dfe97f36afa43e0f5a06cea4dc170e11a17f0a465cc2ce235b94c24e550d6172764a52eaad71", deCompressed, {
+    let valid = sm2.doVerifySignature("123", "344857fe641c9fd3825a389fc85ca8bcab694f199fe155022e17dfe97f36afa43e0f5a06cea4dc170e11a17f0a465cc2ce235b94c24e550d6172764a52eaad71", DE_COMPRESSED, {
         hash: true,
-        der: true,
+        der: false,
         userId: 'userid@soie-chain.com',
     });
-    expect(verifyResult6False).toBe(true)
+    expect(valid).toBe(true)
 })

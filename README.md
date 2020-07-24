@@ -102,6 +102,27 @@ const sm2 = require('@salaku/sm-crypto').sm2;
 let deCompressed = sm2.deCompress('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936')
 ```
 
+### 带 userid 的签名
+
+```js
+const sm2 = require('@salaku/sm-crypto').sm2;
+let sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+
+// 签名结果
+const sig = sm2.doSignature('123', sk, {userId: 'userid@soie-chain.com', der: false, hash: true})
+```
+
+### 带 userid 的签名校验 
+
+```js
+let sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+let valid = sm2.doVerifySignature("123", "344857fe641c9fd3825a389fc85ca8bcab694f199fe155022e17dfe97f36afa43e0f5a06cea4dc170e11a17f0a465cc2ce235b94c24e550d6172764a52eaad71", sm2.getPKFromSK(sk) , {
+        hash: true,
+        der: false,
+        userId: 'userid@soie-chain.com',
+    });
+```
+
 ## sm3
 
 ```js
