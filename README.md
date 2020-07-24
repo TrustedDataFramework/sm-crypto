@@ -85,6 +85,24 @@ const sm2 = require('sm-crypto').sm2;
 let poin = sm2.getPoint(); // 获取一个椭圆曲线点，可在sm2签名时传入
 ```
 
+### 公钥压缩
+
+```js
+const sm2 = require('sm-crypto').sm2;
+let sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+
+let beforeCompress = sm2.getPKFromSK(sk); // 从私钥生成未压缩的公钥
+let compressed = sm2.compress(beforeCompress); // 压缩
+```
+
+### 公钥解压缩
+
+```js
+const sm2 = require('sm-crypto').sm2;
+
+let deCompressed = sm2.deCompress('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936')
+```
+
 ## sm3
 
 ```js
