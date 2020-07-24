@@ -16,6 +16,7 @@
     "js",
     "crypto"
   ],
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },  
   "jest": {
     "testEnvironment": "jsdom",
     "testURL": "https://jest.test"
