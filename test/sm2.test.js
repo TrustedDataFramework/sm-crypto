@@ -86,6 +86,23 @@ test('sign data and verify sign', () => {
         publicKey,
     });
     expect(verifyResult5).toBe(true);
+
+    // 纯签名 + 生成椭圆曲线点 + sm3杂凑 + 不做公钥推 + 添加userId
+    let sigValueHex6 = sm2.doSignature(msgString, privateKey, {
+        hash: true,
+        publicKey,
+        userId: 'userid@soie-chain.com',
+    });
+    let verifyResult6 = sm2.doVerifySignature(msgString, sigValueHex6, publicKey, {
+        hash: true,
+        userId: 'userid@soie-chain.com',
+    });
+    expect(verifyResult6).toBe(true);
+    let verifyResult6False = sm2.doVerifySignature(msgString, sigValueHex6, publicKey, {
+        hash: true,
+        userId: 'wrongTestUserId',
+    });
+    expect(verifyResult6False).toBe(false);
 });
 
 
@@ -96,7 +113,19 @@ test('compress', () => {
     expect(compressed).toBe('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936');
 })
 
+
 test('deCompress', () => {
     let deCompressed = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
     expect(sm2.deCompress('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936')).toBe(deCompressed)
+})
+
+
+test('verifySign', () => {
+    let deCompressed = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
+    let verifyResult6False = sm2.doVerifySignature("123", "344857fe641c9fd3825a389fc85ca8bcab694f199fe155022e17dfe97f36afa43e0f5a06cea4dc170e11a17f0a465cc2ce235b94c24e550d6172764a52eaad71", deCompressed, {
+        hash: true,
+        der: true,
+        userId: 'userid@soie-chain.com',
+    });
+    expect(verifyResult6False).toBe(true)
 })

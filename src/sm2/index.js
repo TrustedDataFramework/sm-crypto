@@ -74,13 +74,13 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
 /**
  * 签名
  */
-function doSignature(msg, privateKey, { pointPool, der, hash, publicKey } = {}) {
+function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
     let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.parseArrayBufferToHex(msg);
 
     if (hash) {
         // sm3杂凑
         publicKey = publicKey || getPublicKeyFromPrivateKey(privateKey);
-        hashHex = doSm3Hash(hashHex, publicKey);
+        hashHex = doSm3Hash(hashHex, publicKey, userId);
     }
 
     let dA = new BigInteger(privateKey, 16);
@@ -120,12 +120,12 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey } = {}) 
 /**
  * 验签
  */
-function doVerifySignature(msg, signHex, publicKey, { der, hash } = {}) {
+function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
     let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.parseArrayBufferToHex(msg);
 
     if (hash) {
         // sm3杂凑
-        hashHex = doSm3Hash(hashHex, publicKey);
+        hashHex = doSm3Hash(hashHex, publicKey, userId);
     }
 
     let r, s;
@@ -157,11 +157,12 @@ function doVerifySignature(msg, signHex, publicKey, { der, hash } = {}) {
 
 /**
  * sm3杂凑算法
+ * 计算M值: Hash(za || msg)
  */
-function doSm3Hash(hashHex, publicKey) {
+function doSm3Hash(hashHex, publicKey, userId) {
     let smDigest = new SM3Digest();
 
-    let z = new SM3Digest().getZ(G, publicKey.substr(2, 128));
+    let z = new SM3Digest().getZ(G, publicKey.substr(2, 128), userId);
     let zValue = _.hexToArray(_.arrayToHex(z).toString());
 
     let p = hashHex;

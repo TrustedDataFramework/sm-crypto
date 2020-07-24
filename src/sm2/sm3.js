@@ -299,13 +299,25 @@ class SM3Digest {
         return returnV;
     }
 
-    getZ(g, publicKey) {
-        let userId = _.parseUtf8StringToHex('1234567812345678');
-        let len = userId.length * 4;
+    getZ(g, publicKey, userId) {
+        let len = 0;
+        if (userId) {
+            if (typeof userId !== 'string') {
+                throw new Error(`sm2: Type of userId Must be String! Receive Type: ${typeof userId}`);
+            }
+            if (userId.length >= 8192) {
+                throw new Error(`sm2: The Length of userId Must Less Than 8192! Length: ${userId.length}`);
+            }
+
+            userId = _.parseUtf8StringToHex(userId);
+            len = userId.length * 4;
+        }
         this.update((len >> 8 & 0x00ff));
         this.update((len & 0x00ff));
-        let userIdWords = _.hexToArray(userId);
-        this.blockUpdate(userIdWords, 0, userIdWords.length);
+        if (userId) {
+            let userIdWords = _.hexToArray(userId);
+            this.blockUpdate(userIdWords, 0, userIdWords.length);
+        }
         let aWords = _.hexToArray(g.curve.a.toBigInteger().toRadix(16));
         let bWords = _.hexToArray(g.curve.b.toBigInteger().toRadix(16));
         let gxWords = _.hexToArray(g.getX().toBigInteger().toRadix(16));
