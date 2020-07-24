@@ -1,13 +1,34 @@
 const { BigInteger, SecureRandom } = require('jsbn');
 const { ECCurveFp } = require('./ec');
-
+const Buffer = require('safe-buffer').Buffer
+const _BigInteger = require('bigi')
 let rng = new SecureRandom();
 let { curve, G, n } = generateEcparam();
 const ecurve = require('ecurve');
 const Curve = ecurve.Curve;
 
+const CURVE_PARAMS = {
+    "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",
+    "a": "fffffffeffffffffffffffffffffffffffffffff00000000fffffffffffffffc",
+    "b": "28e9fa9e9d9f5e344d5a9e4bcf6509a7f39789f515ab8f92ddbcbd414d940e93",
+    "n": "fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123",
+    "h": "01",
+    "Gx": "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7",
+    "Gy": "bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
+}
+
+const CURVE = new Curve(
+    new _BigInteger(CURVE_PARAMS.p, 16),
+    new _BigInteger(CURVE_PARAMS.a, 16),
+    new _BigInteger(CURVE_PARAMS.b, 16),
+    new _BigInteger(CURVE_PARAMS.Gx, 16),
+    new _BigInteger(CURVE_PARAMS.Gy, 16),
+    new _BigInteger(CURVE_PARAMS.n, 16),
+    new _BigInteger(CURVE_PARAMS.h, 16)
+);
+
 function compress(publicKey) {
-    if (publicKey.length === 66)
+    if (publicKey.slice(0, 2) !== '04')
         return publicKey;
     let P = curve.decodePointHex(publicKey)
     let x = leftPad(P.getX().toBigInteger().toString(16), 64);
@@ -15,29 +36,16 @@ function compress(publicKey) {
     return yPrefix + x;
 }
 
-function deCompress(publicKey) {
-    if (publicKey.length === 128)
-        return publicKey;
-    let curve = {
-        "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",
-        "a": "fffffffeffffffffffffffffffffffffffffffff00000000fffffffffffffffc",
-        "b": "28e9fa9e9d9f5e344d5a9e4bcf6509a7f39789f515ab8f92ddbcbd414d940e93",
-        "n": "fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123",
-        "h": "01",
-        "Gx": "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7",
-        "Gy": "bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
-    }
 
-    var p = new BigInteger(curve.p, 16)
-    var a = new BigInteger(curve.a, 16)
-    var b = new BigInteger(curve.b, 16)
-    var n = new BigInteger(curve.n, 16)
-    var h = new BigInteger(curve.h, 16)
-    var Gx = new BigInteger(curve.Gx, 16)
-    var Gy = new BigInteger(curve.Gy, 16)
+function deCompress(pk) {
+    if (pk.slice(0, 2) === '04')
+        return pk;
 
-    curve = new Curve(p, a, b, Gx, Gy, n, h);
-    return pubkey = '04' + pk.slice(2) + ecurve.Point.decodeFrom(curve, Buffer.from(pk, "hex")).affineY.toBuffer(32).toString('hex')
+    return '04' +
+        pk.slice(2) +
+        ecurve.Point
+            .decodeFrom(CURVE, Buffer.from(pk, "hex"))
+            .affineY.toBuffer(32).toString('hex')
 }
 
 /**

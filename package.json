@@ -1,6 +1,6 @@
 {
   "name": "@salaku/sm-crypto",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "sm-crypto",
   "main": "index.js",
   "scripts": {
