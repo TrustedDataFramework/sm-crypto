@@ -1,0 +1,11 @@
+<html>
+<body>
+    <script src="sm2.js"></script>
+    <script>
+        let pk = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
+        let cpk = sm2.compress(pk)
+        console.log(cpk)
+        console.log(sm2.deCompress(cpk))
+    </script>
+</body>
+</html>
