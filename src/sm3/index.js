@@ -99,7 +99,7 @@ function add(x, y) {
 
         return [carry, a];
     });
-    
+
     return result;
 }
 
@@ -208,8 +208,19 @@ function CF(V, Bi) {
     return xor([A, B, C, D, E, F, G, H].join(''), V);
 }
 
+function buf2Binary(buf){
+    buf = (buf instanceof ArrayBuffer) ? new Uint8Array(buf) : buf;
+    let ret = ''
+    for(let i = 0; i < buf.length; i++){
+        ret += leftPad(buf[i].toString(2), 8)
+    }
+    return ret
+}
+
 module.exports = function(str) {
-    const binary = str2binary(str);
+
+    const binary = typeof str === 'string' ?
+        str2binary(str) : buf2Binary(str)
 
     // 填充
     const len = binary.length;
