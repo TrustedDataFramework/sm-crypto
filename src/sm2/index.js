@@ -160,13 +160,13 @@ function doVerifySignature(msg, signHex, publicKey, { der, hash } = {}) {
  */
 function doSm3Hash(hashHex, publicKey) {
     let smDigest = new SM3Digest();
-    
+
     let z = new SM3Digest().getZ(G, publicKey.substr(2, 128));
     let zValue = _.hexToArray(_.arrayToHex(z).toString());
-    
+
     let p = hashHex;
     let pValue = _.hexToArray(p);
-    
+
     let hashData = new Array(smDigest.getDigestSize());
     smDigest.blockUpdate(zValue, 0, zValue.length);
     smDigest.blockUpdate(pValue, 0, pValue.length);
@@ -205,4 +205,7 @@ module.exports = {
     doSignature,
     doVerifySignature,
     getPoint,
+    compress: _.compress,
+    getPKFromSK: _.getPKFromSK,
+    deCompress: _.deCompress
 };

@@ -1,8 +1,44 @@
 const { BigInteger, SecureRandom } = require('jsbn');
-const { ECCurveFp } = require ('./ec');
+const { ECCurveFp } = require('./ec');
 
 let rng = new SecureRandom();
 let { curve, G, n } = generateEcparam();
+const ecurve = require('ecurve');
+const Curve = ecurve.Curve;
+
+function compress(publicKey) {
+    if (publicKey.length === 66)
+        return publicKey;
+    let P = curve.decodePointHex(publicKey)
+    let x = leftPad(P.getX().toBigInteger().toString(16), 64);
+    const yPrefix = P.getY().toBigInteger() ? "02" : "03";
+    return yPrefix + x;
+}
+
+function deCompress(publicKey) {
+    if (publicKey.length === 128)
+        return publicKey;
+    let curve = {
+        "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",
+        "a": "fffffffeffffffffffffffffffffffffffffffff00000000fffffffffffffffc",
+        "b": "28e9fa9e9d9f5e344d5a9e4bcf6509a7f39789f515ab8f92ddbcbd414d940e93",
+        "n": "fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123",
+        "h": "01",
+        "Gx": "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7",
+        "Gy": "bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
+    }
+
+    var p = new BigInteger(curve.p, 16)
+    var a = new BigInteger(curve.a, 16)
+    var b = new BigInteger(curve.b, 16)
+    var n = new BigInteger(curve.n, 16)
+    var h = new BigInteger(curve.h, 16)
+    var Gx = new BigInteger(curve.Gx, 16)
+    var Gy = new BigInteger(curve.Gy, 16)
+
+    curve = new Curve(p, a, b, Gx, Gy, n, h);
+    return pubkey = '04' + pk.slice(2) + ecurve.Point.decodeFrom(curve, Buffer.from(pk, "hex")).affineY.toBuffer(32).toString('hex')
+}
 
 /**
  * 获取公共椭圆曲线
@@ -97,7 +133,7 @@ function arrayToHex(arr) {
         words[i >>> 3] |= parseInt(arr[j], 10) << (24 - (i % 8) * 4);
         j++;
     }
-    
+
     // 转换到16进制
     let hexChars = [];
     for (let i = 0; i < arr.length; i++) {
@@ -153,6 +189,16 @@ function hexToArray(hexStr) {
     return words
 }
 
+/**
+ * 计算公钥
+ */
+function getPKFromSK(privateKey) {
+    let PA = G.multiply(new BigInteger(privateKey, 16));
+    let x = leftPad(PA.getX().toBigInteger().toString(16), 64);
+    let y = leftPad(PA.getY().toBigInteger().toString(16), 64);
+    return '04' + x + y;
+}
+
 module.exports = {
     getGlobalCurve,
     generateEcparam,
@@ -163,4 +209,7 @@ module.exports = {
     arrayToHex,
     arrayToUtf8,
     hexToArray,
+    compress,
+    getPKFromSK,
+    deCompress
 };

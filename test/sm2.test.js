@@ -40,7 +40,7 @@ test('sign data and verify sign', () => {
     let sigValueHex = sm2.doSignature(msgString, privateKey);
     let verifyResult = sm2.doVerifySignature(msgString, sigValueHex, publicKey);
     expect(verifyResult).toBe(true);
-    
+
     // 纯签名
     let sigValueHex2 = sm2.doSignature(msgString, privateKey, {
         pointPool: [sm2.getPoint(), sm2.getPoint(), sm2.getPoint(), sm2.getPoint()],
@@ -87,3 +87,16 @@ test('sign data and verify sign', () => {
     });
     expect(verifyResult5).toBe(true);
 });
+
+
+test('compress', () => {
+    let sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+    let beforeCompress = sm2.getPKFromSK(sk);
+    let compressed = sm2.compress(beforeCompress);
+    expect(compressed).toBe('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936');
+})
+
+test('deCompress', () => {
+    let deCompressed = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
+    expect(sm2.deCompress('02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936')).toBe(deCompressed)
+})
