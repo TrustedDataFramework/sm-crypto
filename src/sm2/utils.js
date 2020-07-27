@@ -6,6 +6,7 @@ let rng = new SecureRandom();
 let { curve, G, n } = generateEcparam();
 const ecurve = require('ecurve');
 const Curve = ecurve.Curve;
+const GLOBAL = window || global;
 
 const CURVE_PARAMS = {
     "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",
@@ -122,6 +123,21 @@ function parseArrayBufferToHex(input) {
     return Array.prototype.map.call(new Uint8Array(input), x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
+
+function buf2Hex(input){
+    if(
+        !(input instanceof ArrayBuffer) &&
+        !(input instanceof Uint8Array) &&
+        !(GLOBAL && GLOBAL['Buffer'] && input instanceof GLOBAL['Buffer']) &&
+        !(input instanceof Array)
+    )
+        throw new Error("input " + input + " is not ArrayBuffer Uint8Array or Buffer and other array-like ")
+    if(input instanceof ArrayBuffer)
+        input = new Uint8Array(input)
+    // input maybe Buffer or Uint8Array
+    return Array.prototype.map.call(input, x => ('00' + x.toString(16)).slice(-2)).join('');
+}
+
 /**
  * 补全16进制字符串
  */
@@ -219,5 +235,6 @@ module.exports = {
     hexToArray,
     compress,
     getPKFromSK,
-    deCompress
+    deCompress,
+    buf2Hex
 };

@@ -73,9 +73,13 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
 
 /**
  * 签名
+ * 
  */
 function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
-    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.parseArrayBufferToHex(msg);
+    if(typeof privateKey !== 'string')
+        privateKey = _.buf2Hex(privateKey)
+
+    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.buf2Hex(msg);
 
     if (hash) {
         // sm3杂凑
@@ -121,8 +125,10 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId 
  * 验签
  */
 function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
-    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.parseArrayBufferToHex(msg);
-
+    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.buf2Hex(msg);
+    if(!typeof signHex === 'string')
+        signHex = _.buf2Hex(signHex)
+        
     if (hash) {
         // sm3杂凑
         hashHex = doSm3Hash(hashHex, publicKey, userId);

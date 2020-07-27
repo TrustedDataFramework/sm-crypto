@@ -303,13 +303,15 @@ class SM3Digest {
         let len = 0;
         if (userId) {
             if (typeof userId !== 'string') {
-                throw new Error(`sm2: Type of userId Must be String! Receive Type: ${typeof userId}`);
+                userId = _.buf2Hex(userId)
+            }else{
+                userId = _.parseUtf8StringToHex(userId);
             }
             if (userId.length >= 8192) {
                 throw new Error(`sm2: The Length of userId Must Less Than 8192! Length: ${userId.length}`);
             }
 
-            userId = _.parseUtf8StringToHex(userId);
+            
             len = userId.length * 4;
         }
         this.update((len >> 8 & 0x00ff));
