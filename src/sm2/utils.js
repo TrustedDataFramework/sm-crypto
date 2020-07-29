@@ -6,7 +6,7 @@ let rng = new SecureRandom();
 let { curve, G, n } = generateEcparam();
 const ecurve = require('ecurve');
 const Curve = ecurve.Curve;
-const GLOBAL = window || global;
+const GLOBAL = this;
 
 const CURVE_PARAMS = {
     "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",

@@ -1,6 +1,6 @@
 {
   "name": "@salaku/sm-crypto",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "sm-crypto",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,6 @@
     "testEnvironment": "jsdom",
     "testURL": "https://jest.test"
   },
-  "author": "june_01",
   "license": "MIT",
   "dependencies": {
     "jsbn": "^1.1.0",
