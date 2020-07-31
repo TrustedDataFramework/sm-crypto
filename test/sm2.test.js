@@ -1,8 +1,9 @@
 const sm2 = require('../index').sm2;
 
 const cipherMode = 1; // 1 - C1C3C2，0 - C1C2C3
+const sks = ['f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5', 'b01bb4ceb384ceee3b1eaf2ed78deba989ed92b25c75f28de58fa8bba191d7bc', 'b8bcde6ea12982ff341cef358040584e0b397b51beaf0b11a45f80be9b5dfe33', 'a0f9c0d3c7969ee21412a98da06a9b6c88b66423f7906b121297f2cca6f55231', '4a395b3cd397d007004a7dd71188d549950529e25983d1a2d4c39dffcfa28d8f', 'b43f062ed890a45f2e25ab6eff008b613d8ad98d018f83fa0f7c72e1f3e3b6fa', '368e24f3a2e6042c362c57233044603391b14f428c72b0c19b649ee16fb010fe']
+const compressedPKS = ['02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936', '02f9d915954e04107d11fb9689a6330c22199e1e830857bff076e033bbca2888d4', '03cd2875d6381b974bd13c9c6087c08fcf0b9b700ea8c9b601ae35a6a9651fbce2', '03744f32e35e8e45cfa6360b49fe12e730cb294bce40db5099b0de697aa00a3d71', '020f0a0c7fb839a51b1f64cf2b49f9b3269d2b9ca49d3309e3de4453f389c827bb', '02281b065a508bace266556f239e491a44a0a64789c7d4fc333d2a875a7ddc1714', '039608d098f275db24db04211d62f66e1438bdd0d93d7e3dbe33136ef3fc53c726']
 
-// const msgString = 'abcdefghABCDEFGH12345678abcdefghABCDEFGH12345678abcdefghABCDabcdefghABCDEFGH12345678abcdefghABCDEFGH12345678abcdefghABCDabcdefghABCDEFGH12345678abcdefghABCDEFGH12345678abcdefghABCDabcdefghABCDEFGH12345678abcdefghABCDEFGH12345678abcdefghABCDabcdefghABCDEFGH';
 const msgString = 'absasdagfadgadsfdfdsf';
 
 let publicKey;
@@ -111,10 +112,13 @@ test('sign data and verify sign', () => {
 
 
 test('compress', () => {
-    let sk = TEST_SK
-    let beforeCompress = sm2.getPKFromSK(sk);
-    let compressed = sm2.compress(beforeCompress);
-    expect(compressed).toBe(COMPRESSED);
+    let i = 0
+    sks.forEach(sk => {
+        const pk = sm2.getPKFromSK(sk)
+        const compressed = sm2.compress(pk)
+        expect(compressed).toBe(compressedPKS[i]);
+        i++;
+    })
 })
 
 
@@ -135,3 +139,4 @@ test('verifySign', () => {
     });
     expect(valid).toBe(true)
 })
+

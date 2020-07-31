@@ -29,12 +29,11 @@ const CURVE = new Curve(
 );
 
 function compress(publicKey) {
+    console.log(publicKey)
     if (publicKey.slice(0, 2) !== '04')
         return publicKey;
-    let P = curve.decodePointHex(publicKey)
-    let x = leftPad(P.getX().toBigInteger().toString(16), 64);
-    const yPrefix = P.getY().toBigInteger() ? "02" : "03";
-    return yPrefix + x;
+    let P = ecurve.Point.decodeFrom(CURVE, Buffer.from(publicKey, 'hex'))
+    return P.getEncoded(true).toString('hex')
 }
 
 
