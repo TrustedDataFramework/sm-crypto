@@ -140,3 +140,17 @@ test('verifySign', () => {
     expect(valid).toBe(true)
 })
 
+test('encrypt', () => {
+    const sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+    const pk = sm2.getPKFromSK(sk)
+    let encrypted = sm2.doEncrypt('123', pk , sm2.C1C2C3)
+    console.log(encrypted)
+})
+
+test('decrypt', () => {
+    const sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
+    const pk = sm2.getPKFromSK(sk)
+    let encrypted = '9232f758694e4c45df8b52c6c86a630e58d88f4eeb9bcc0375e8c636c503fc2de3eebe14b1c9353ffedbaa784985fdb958e1824787d813a91eae55a153b284c9a7a14df792b9c1e293ee297b3dadb3f146ca092cd3fd2830e0731fc38cb2c953e69684'
+    const ret = sm2.doDecrypt(encrypted, sk, sm2.C1C2C3)
+    console.log(Buffer.from(ret).toString('ascii'))
+})

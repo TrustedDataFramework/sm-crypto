@@ -12,7 +12,7 @@ const C1C2C3 = 0;
  */
 function doEncrypt(msg, publicKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
-    msg = _.hexToArray(_.parseUtf8StringToHex(msg));
+    msg = typeof msg === 'string' ? _.hexToArray(_.parseUtf8StringToHex(msg)) : msg;
 
     if (publicKey.length > 128) {
       publicKey = publicKey.substr(publicKey.length - 128);
@@ -34,7 +34,11 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
 }
 
 /**
- * 解密
+ *
+ * @param encryptData {string} 十六进制字符串
+ * @param privateKey {string}
+ * @param cipherMode
+ * @returns {[]|*[]}
  */
 function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
@@ -42,15 +46,18 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     privateKey = new BigInteger(privateKey, 16);
 
     let c1X = encryptData.substr(0, 64);
-    let c1Y = encryptData.substr(0 + c1X.length, 64);
+    let c1Y = encryptData.substr(c1X.length, 64);
     let c1Length = c1X.length + c1Y.length;
 
-    let c3 = encryptData.substr(c1Length, 64);
-    let c2 = encryptData.substr(c1Length + 64);
+    let c2, c3;
+
 
     if (cipherMode === C1C2C3) {
         c3 = encryptData.substr(encryptData.length - 64);
         c2 = encryptData.substr(c1Length, encryptData.length - c1Length - 64);
+    }else{
+        c3 = encryptData.substr(c1Length, 64);
+        c2 = encryptData.substr(c1Length + 64);
     }
 
     let data = _.hexToArray(c2);
@@ -64,16 +71,15 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let isDecrypt = _.arrayToHex(c3_) === c3;
 
     if (isDecrypt) {
-        let decryptData = _.arrayToUtf8(data);
-        return decryptData;
+        return data;
     } else {
-        return '';
+        return [];
     }
 }
 
 /**
  * 签名
- * 
+ *
  */
 function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
     if(typeof privateKey !== 'string')
@@ -128,7 +134,7 @@ function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) 
     let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.buf2Hex(msg);
     if(!typeof signHex === 'string')
         signHex = _.buf2Hex(signHex)
-        
+
     if (hash) {
         // sm3杂凑
         hashHex = doSm3Hash(hashHex, publicKey, userId);
@@ -214,5 +220,7 @@ module.exports = {
     getPoint,
     compress: _.compress,
     getPKFromSK: _.getPKFromSK,
-    deCompress: _.deCompress
+    deCompress: _.deCompress,
+    C1C2C3: C1C2C3,
+    C1C3C2: 1
 };

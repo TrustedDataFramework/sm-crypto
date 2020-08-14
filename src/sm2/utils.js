@@ -29,7 +29,6 @@ const CURVE = new Curve(
 );
 
 function compress(publicKey) {
-    console.log(publicKey)
     if (publicKey.slice(0, 2) !== '04')
         return publicKey;
     let P = ecurve.Point.decodeFrom(CURVE, Buffer.from(publicKey, 'hex'))
