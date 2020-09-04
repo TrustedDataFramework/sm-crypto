@@ -30,7 +30,8 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
     cipher.doFinal(c3)
     c3 = _.arrayToHex(c3);
 
-    return cipherMode === C1C2C3 ? c1 + c2 + c3 : c1 + c3 + c2;
+    let ret = cipherMode === C1C2C3 ? c1 + c2 + c3 : c1 + c3 + c2;
+    return '04' + ret
 }
 
 /**
@@ -44,6 +45,8 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
 
     privateKey = new BigInteger(privateKey, 16);
+    if(encryptData.substr(0, 2) === '04')
+        encryptData = encryptData.substr(2, encryptData.length - 2)
 
     let c1X = encryptData.substr(0, 64);
     let c1Y = encryptData.substr(c1X.length, 64);

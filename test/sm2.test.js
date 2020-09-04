@@ -132,7 +132,7 @@ test('sign with user-id', () => {
 })
 
 test('verifySign', () => {
-    let valid = sm2.doVerifySignature("123", "344857fe641c9fd3825a389fc85ca8bcab694f199fe155022e17dfe97f36afa43e0f5a06cea4dc170e11a17f0a465cc2ce235b94c24e550d6172764a52eaad71", DE_COMPRESSED, {
+    let valid = sm2.doVerifySignature("123", "cc9101a30035b6c045e6f1f85dddf49f0354e886affc6b7471c34b0b5167b8362c543aa782d74e1e170d9ed66eec92c006ad70c27b9777f1b26c9d9d400b6354", DE_COMPRESSED, {
         hash: true,
         der: false,
         userId: 'userid@soie-chain.com',
@@ -150,7 +150,7 @@ test('encrypt', () => {
 test('decrypt', () => {
     const sk = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5'
     const pk = sm2.getPKFromSK(sk)
-    let encrypted = '9232f758694e4c45df8b52c6c86a630e58d88f4eeb9bcc0375e8c636c503fc2de3eebe14b1c9353ffedbaa784985fdb958e1824787d813a91eae55a153b284c9a7a14df792b9c1e293ee297b3dadb3f146ca092cd3fd2830e0731fc38cb2c953e69684'
+    let encrypted = '04fc01e760e6a6b21ae205dc3424d4d4889bc097248eb803137273eb4ccd953fb562eb30779390db296bdb73bdff129cbd750d8635814d552f190b4b97876826c7168903a73e5ddf0bfb1247e04ca0835da0792b5b149a3a6034bbe7a3ff4ddc5218dec0'
     const ret = sm2.doDecrypt(encrypted, sk, sm2.C1C2C3)
     console.log(Buffer.from(ret).toString('ascii'))
 })
