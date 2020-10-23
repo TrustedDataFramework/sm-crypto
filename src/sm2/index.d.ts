@@ -1,6 +1,7 @@
 import { KeyPair } from './utils'
 
 export function generateKeyPairHex(): KeyPair
+
 export const C1C2C3 = 0
 export const C1C3C2 = 1
 
@@ -34,6 +35,4 @@ export function compress(pk: string): string
 export function getPKFromSK(sk: string): string
 
 export function deCompress(pk: string): string
-
-export function getPKFromSK(sk: string): string
 
