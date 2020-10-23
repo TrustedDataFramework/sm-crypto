@@ -15,8 +15,8 @@ class SM2Cipher {
     reset() {
         this.sm3keybase = new SM3Digest();
         this.sm3c3 = new SM3Digest();
-        let xWords = _.hexToArray(this.p2.getX().toBigInteger().toRadix(16));
-        let yWords = _.hexToArray(this.p2.getY().toBigInteger().toRadix(16));
+        let xWords = _.hex2Bin(this.p2.getX().toBigInteger().toRadix(16));
+        let yWords = _.hex2Bin(this.p2.getY().toBigInteger().toRadix(16));
         this.sm3keybase.blockUpdate(xWords, 0, xWords.length);
         this.sm3c3.blockUpdate(xWords, 0, xWords.length);
         this.sm3keybase.blockUpdate(yWords, 0, yWords.length);

@@ -303,7 +303,7 @@ class SM3Digest {
         let len = 0;
         if (userId) {
             if (typeof userId !== 'string') {
-                userId = _.buf2Hex(userId)
+                userId = _.bin2Hex(userId)
             }else{
                 userId = _.parseUtf8StringToHex(userId);
             }
@@ -317,15 +317,15 @@ class SM3Digest {
         this.update((len >> 8 & 0x00ff));
         this.update((len & 0x00ff));
         if (userId) {
-            let userIdWords = _.hexToArray(userId);
+            let userIdWords = _.hex2Bin(userId);
             this.blockUpdate(userIdWords, 0, userIdWords.length);
         }
-        let aWords = _.hexToArray(g.curve.a.toBigInteger().toRadix(16));
-        let bWords = _.hexToArray(g.curve.b.toBigInteger().toRadix(16));
-        let gxWords = _.hexToArray(g.getX().toBigInteger().toRadix(16));
-        let gyWords = _.hexToArray(g.getY().toBigInteger().toRadix(16));
-        let pxWords = _.hexToArray(publicKey.substr(0, 64));
-        let pyWords = _.hexToArray(publicKey.substr(64, 64));
+        let aWords = _.hex2Bin(g.curve.a.toBigInteger().toRadix(16));
+        let bWords = _.hex2Bin(g.curve.b.toBigInteger().toRadix(16));
+        let gxWords = _.hex2Bin(g.getX().toBigInteger().toRadix(16));
+        let gyWords = _.hex2Bin(g.getY().toBigInteger().toRadix(16));
+        let pxWords = _.hex2Bin(publicKey.substr(0, 64));
+        let pyWords = _.hex2Bin(publicKey.substr(64, 64));
         this.blockUpdate(aWords, 0, aWords.length);
         this.blockUpdate(bWords, 0, bWords.length);
         this.blockUpdate(gxWords, 0, gxWords.length);
