@@ -24,11 +24,11 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
     let c1 = cipher.initEncipher(publicKey);
 
     cipher.encryptBlock(msg);
-    let c2 = util.arrayToHex(msg);
+    let c2 = util.bin2Hex(msg);
 
     let c3 = new Array(32);
     cipher.doFinal(c3)
-    c3 = util.arrayToHex(c3);
+    c3 = util.bin2Hex(c3);
 
     let ret = cipherMode === C1C2C3 ? c1 + c2 + c3 : c1 + c3 + c2;
     return '04' + ret
@@ -63,7 +63,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
         c2 = encryptData.substr(c1Length + 64);
     }
 
-    let data = util.hexToArray(c2);
+    let data = util.hex2Bin(c2);
 
     let c1 = cipher.createPoint(c1X, c1Y);
     cipher.initDecipher(privateKey, c1);
@@ -71,12 +71,12 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let c3_ = new Array(32);
     cipher.doFinal(c3_);
 
-    let isDecrypt = util.arrayToHex(c3_) === c3;
+    let isDecrypt = util.bin2Hex(c3_) === c3;
 
     if (isDecrypt) {
-        return data;
+        return data
     } else {
-        return [];
+        return []
     }
 }
 
@@ -134,9 +134,9 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId 
  * 验签
  */
 function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
-    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.buf2Hex(msg);
-    if(!typeof signHex === 'string')
-        signHex = util.buf2Hex(signHex)
+    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
+    if(typeof signHex !== 'string')
+        signHex = util.bin2Hex(signHex)
 
     if (hash) {
         // sm3杂凑
@@ -178,17 +178,17 @@ function doSm3Hash(hashHex, publicKey, userId) {
     let smDigest = new SM3Digest();
 
     let z = new SM3Digest().getZ(G, publicKey.substr(2, 128), userId);
-    let zValue = util.hexToArray(util.arrayToHex(z).toString());
+    let zValue = util.hex2Bin(util.bin2Hex(z));
 
     let p = hashHex;
-    let pValue = util.hexToArray(p);
+    let pValue = util.hex2Bin(p);
 
     let hashData = new Array(smDigest.getDigestSize());
     smDigest.blockUpdate(zValue, 0, zValue.length);
     smDigest.blockUpdate(pValue, 0, pValue.length);
     smDigest.doFinal(hashData, 0);
 
-    return util.arrayToHex(hashData).toString();
+    return util.bin2Hex(hashData)
 }
 
 /**
@@ -212,7 +212,7 @@ function getPoint() {
     keypair.x1 = PA.getX().toBigInteger();
 
     return keypair;
-};
+}
 
 module.exports = {
     generateKeyPairHex: util.generateKeyPairHex,

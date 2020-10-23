@@ -110,25 +110,9 @@ function generateKeyPairHex() {
  * 解析utf8字符串到16进制
  */
 function parseUtf8StringToHex(input) {
-    input = unescape(encodeURIComponent(input));
-
-    let length = input.length;
-
-    // 转换到字数组
-    let words = [];
-    for (let i = 0; i < length; i++) {
-        words[i >>> 2] |= (input.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
-    }
-
-    // 转换到16进制
-    let hexChars = [];
-    for (let i = 0; i < length; i++) {
-        let bite = (words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
-        hexChars.push((bite >>> 4).toString(16));
-        hexChars.push((bite & 0x0f).toString(16));
-    }
-
-    return hexChars.join('');
+    if(typeof Buffer === 'function')
+        return Buffer.from(input, 'utf-8').toString('hex')
+    return bin2hex(str2Bin(input))
 }
 
 function bin2hex(input){

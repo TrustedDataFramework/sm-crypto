@@ -17,7 +17,7 @@ export declare class BigInteger {
     protected shortValue(): number;
     protected signum(): 0 | 1 | -1;
     toByteArray(): number[];
-    protected equals(a: BigInteger): boolean;
+    equals(a: BigInteger): boolean;
     protected min(a: BigInteger): BigInteger;
     protected max(a: BigInteger): BigInteger;
     protected and(a: BigInteger): BigInteger;

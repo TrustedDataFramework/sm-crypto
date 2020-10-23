@@ -76,7 +76,7 @@ class SM2Cipher {
     }
 
     doFinal(c3) {
-        let yWords = _.hexToArray(this.p2.getY().toBigInteger().toRadix(16));
+        let yWords = _.hex2Bin(this.p2.getY().toBigInteger().toRadix(16));
         this.sm3c3.blockUpdate(yWords, 0, yWords.length);
         this.sm3c3.doFinal(c3, 0);
         this.reset();
