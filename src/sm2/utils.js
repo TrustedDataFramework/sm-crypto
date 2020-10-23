@@ -13,7 +13,7 @@ function hexToInt(x) {
 }
 
 
-function hex2Bin(s){
+function hex2bin(s){
     if(s instanceof Uint8Array)
         return s
     if(s instanceof ArrayBuffer || Array.isArray(s))
@@ -39,7 +39,7 @@ function hex2Bin(s){
 function compress(publicKey) {
     if (publicKey.slice(0, 2) !== '04')
         return publicKey;
-    const b = hex2Bin(publicKey)
+    const b = hex2bin(publicKey)
     const x = publicKey.slice(2, 2 + 64)
     return (b[b.length - 1] & 1 ? '03' : '02') + x
 }
@@ -112,7 +112,7 @@ function generateKeyPairHex() {
 function parseUtf8StringToHex(input) {
     if(typeof Buffer === 'function')
         return Buffer.from(input, 'utf-8').toString('hex')
-    return bin2hex(str2Bin(input))
+    return bin2hex(str2bin(input))
 }
 
 function bin2hex(input){
@@ -217,11 +217,21 @@ function getPKFromSK(privateKey) {
     return '04' + x + y;
 }
 
-function str2Bin(str){
+function str2bin(str){
     if(typeof Buffer === 'function')
         return Buffer.from(str, 'utf-8')
     if(typeof TextEncoder === 'function')
         return new TextEncoder().encode(str)
+}
+
+function bin2str(bin){
+    if(typeof bin === 'string')
+        return bin
+    if(typeof Buffer === 'function')
+        return Buffer.from(bin).toString('utf-8')
+    if(Array.isArray(bin))
+        bin = new Uint8Array(bin)
+    return new TextDecoder().decode(bin)
 }
 
 module.exports = {
@@ -230,11 +240,11 @@ module.exports = {
     generateKeyPairHex,
     parseUtf8StringToHex,
     leftPad,
-    arrayToUtf8,
+    bin2str: bin2str,
     compress,
     getPKFromSK,
     deCompress,
-    bin2Hex: bin2hex,
-    hex2Bin: hex2Bin,
-    str2Bin: str2Bin
+    bin2hex: bin2hex,
+    hex2bin: hex2bin,
+    str2bin: str2bin
 }

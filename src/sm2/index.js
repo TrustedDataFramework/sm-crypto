@@ -12,8 +12,8 @@ const C1C2C3 = 0;
  */
 function doEncrypt(msg, publicKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
-    msg = typeof msg === 'string' ? util.str2Bin(msg) : msg;
-    publicKey = typeof publicKey !== 'string' ? util.bin2Hex(publicKey) : publicKey
+    msg = typeof msg === 'string' ? util.str2bin(msg) : msg;
+    publicKey = typeof publicKey !== 'string' ? util.bin2hex(publicKey) : publicKey
     if (publicKey.length > 128) {
       publicKey = publicKey.substr(publicKey.length - 128);
     }
@@ -24,11 +24,11 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
     let c1 = cipher.initEncipher(publicKey);
 
     cipher.encryptBlock(msg);
-    let c2 = util.bin2Hex(msg);
+    let c2 = util.bin2hex(msg);
 
     let c3 = new Array(32);
     cipher.doFinal(c3)
-    c3 = util.bin2Hex(c3);
+    c3 = util.bin2hex(c3);
 
     let ret = cipherMode === C1C2C3 ? c1 + c2 + c3 : c1 + c3 + c2;
     return '04' + ret
@@ -43,7 +43,7 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
  */
 function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
-    privateKey = util.bin2Hex(privateKey)
+    privateKey = util.bin2hex(privateKey)
     privateKey = new BigInteger(privateKey, 16);
     if(encryptData.substr(0, 2) === '04')
         encryptData = encryptData.substr(2, encryptData.length - 2)
@@ -63,7 +63,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
         c2 = encryptData.substr(c1Length + 64);
     }
 
-    let data = util.hex2Bin(c2);
+    let data = util.hex2bin(c2);
 
     let c1 = cipher.createPoint(c1X, c1Y);
     cipher.initDecipher(privateKey, c1);
@@ -71,7 +71,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let c3_ = new Array(32);
     cipher.doFinal(c3_);
 
-    let isDecrypt = util.bin2Hex(c3_) === c3;
+    let isDecrypt = util.bin2hex(c3_) === c3;
 
     if (isDecrypt) {
         return data
@@ -85,9 +85,9 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
  *
  */
 function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
-    privateKey = util.bin2Hex(privateKey)
+    privateKey = util.bin2hex(privateKey)
 
-    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
+    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2hex(msg);
 
     if (hash) {
         // sm3杂凑
@@ -133,10 +133,10 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId 
  * 验签
  */
 function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
-    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
-    publicKey = util.bin2Hex(publicKey)
+    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2hex(msg);
+    publicKey = util.bin2hex(publicKey)
     if(typeof signHex !== 'string')
-        signHex = util.bin2Hex(signHex)
+        signHex = util.bin2hex(signHex)
 
     if (hash) {
         // sm3杂凑
@@ -178,17 +178,17 @@ function doSm3Hash(hashHex, publicKey, userId) {
     let smDigest = new SM3Digest();
 
     let z = new SM3Digest().getZ(G, publicKey.substr(2, 128), userId);
-    let zValue = util.hex2Bin(util.bin2Hex(z));
+    let zValue = util.hex2bin(util.bin2hex(z));
 
     let p = hashHex;
-    let pValue = util.hex2Bin(p);
+    let pValue = util.hex2bin(p);
 
     let hashData = new Array(smDigest.getDigestSize());
     smDigest.blockUpdate(zValue, 0, zValue.length);
     smDigest.blockUpdate(pValue, 0, pValue.length);
     smDigest.doFinal(hashData, 0);
 
-    return util.bin2Hex(hashData)
+    return util.bin2hex(hashData)
 }
 
 /**

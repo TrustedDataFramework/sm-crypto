@@ -1,4 +1,5 @@
 const sm2 = require('../index').sm2;
+const util = require('../index').util
 
 const cipherMode = 1; // 1 - C1C3C2，0 - C1C2C3
 const sks = ['f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b5', 'b01bb4ceb384ceee3b1eaf2ed78deba989ed92b25c75f28de58fa8bba191d7bc', 'b8bcde6ea12982ff341cef358040584e0b397b51beaf0b11a45f80be9b5dfe33', 'a0f9c0d3c7969ee21412a98da06a9b6c88b66423f7906b121297f2cca6f55231', '4a395b3cd397d007004a7dd71188d549950529e25983d1a2d4c39dffcfa28d8f', 'b43f062ed890a45f2e25ab6eff008b613d8ad98d018f83fa0f7c72e1f3e3b6fa', '368e24f3a2e6042c362c57233044603391b14f428c72b0c19b649ee16fb010fe']
@@ -13,16 +14,6 @@ const TEST_SK = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b
 const DE_COMPRESSED = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
 const COMPRESSED = '02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936'
 
-function bin2str(s){
-    if(typeof s === 'string')
-        return s
-    if(Array.isArray(s))
-        s = new Uint8Array(s)
-    if(typeof TextEncoder === 'function')
-        return new TextEncoder().encode(s)
-    if(typeof Buffer === 'function')
-        return Buffer.from(s).toString('utf-8')
-}
 
 beforeAll(() => {
     // 生成密钥对
@@ -38,18 +29,18 @@ test('generate keypair', () => {
 });
 
 test('encrypt and decrypt data', () => {
-    let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode);
-    let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode);
+    let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode)
+    let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode)
 
-    expect(bin2str(decryptData)).toBe(msgString);
+    expect(util.bin2str(util.hex2bin(decryptData))).toBe(msgString);
 
     for (let i = 0; i < 100; i++) {
         let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode);
-        let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode);
+        let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode)
 
-        expect(bin2str(decryptData)).toBe(msgString);
+        expect(util.bin2str(util.hex2bin(decryptData))).toBe(msgString)
     }
-});
+})
 
 test('sign data and verify sign', () => {
     // 纯签名 + 生成椭圆曲线点
