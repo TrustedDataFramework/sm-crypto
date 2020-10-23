@@ -1,5 +1,4 @@
 const sm3 = require('../index').sm3;
-
 test('must match the result', () => {
     expect(sm3('abc')).toBe('66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0');
 
@@ -13,9 +12,9 @@ test('must match the result', () => {
 
     expect(sm3('abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd')).toBe('debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732');
 
-    const buf = 'abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd'.split('')
+    let buf = 'abcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd'.split('')
         .map(x => x.charCodeAt(0))
+    buf = new Uint8Array(buf)
+    expect(sm3(buf)).toBe('debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732')
 
-    expect(sm3(buf)).toBe('debe9ff92275b8a138604889c18e5a4d6fdb70e5387e5765293dcba39c0c5732');
-
-});
+})

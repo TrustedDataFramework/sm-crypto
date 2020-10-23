@@ -1,10 +1,10 @@
-const { BigInteger } = require('jsbn');
+const { BigInteger } = require('../lib/jsbn');
 const { encodeDer, decodeDer } = require('./asn1');
 const SM3Digest = require('./sm3');
 const SM2Cipher = require('./sm2');
-const _ = require('./utils');
+const util = require('./utils');
 
-let { G, curve, n } = _.generateEcparam();
+let { G, curve, n } = util.generateEcparam();
 const C1C2C3 = 0;
 
 /**
@@ -12,8 +12,8 @@ const C1C2C3 = 0;
  */
 function doEncrypt(msg, publicKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
-    msg = typeof msg === 'string' ? _.hexToArray(_.parseUtf8StringToHex(msg)) : msg;
-
+    msg = typeof msg === 'string' ? util.str2Bin(msg) : msg;
+    publicKey = typeof publicKey !== 'string' ? util.bin2Hex(publicKey) : publicKey
     if (publicKey.length > 128) {
       publicKey = publicKey.substr(publicKey.length - 128);
     }
@@ -24,11 +24,11 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
     let c1 = cipher.initEncipher(publicKey);
 
     cipher.encryptBlock(msg);
-    let c2 = _.arrayToHex(msg);
+    let c2 = util.arrayToHex(msg);
 
     let c3 = new Array(32);
     cipher.doFinal(c3)
-    c3 = _.arrayToHex(c3);
+    c3 = util.arrayToHex(c3);
 
     let ret = cipherMode === C1C2C3 ? c1 + c2 + c3 : c1 + c3 + c2;
     return '04' + ret
@@ -63,7 +63,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
         c2 = encryptData.substr(c1Length + 64);
     }
 
-    let data = _.hexToArray(c2);
+    let data = util.hexToArray(c2);
 
     let c1 = cipher.createPoint(c1X, c1Y);
     cipher.initDecipher(privateKey, c1);
@@ -71,7 +71,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let c3_ = new Array(32);
     cipher.doFinal(c3_);
 
-    let isDecrypt = _.arrayToHex(c3_) === c3;
+    let isDecrypt = util.arrayToHex(c3_) === c3;
 
     if (isDecrypt) {
         return data;
@@ -86,9 +86,9 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
  */
 function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
     if(typeof privateKey !== 'string')
-        privateKey = _.buf2Hex(privateKey)
+        privateKey = util.bin2Hex(privateKey)
 
-    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.buf2Hex(msg);
+    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
 
     if (hash) {
         // sm3杂凑
@@ -127,16 +127,16 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId 
         return encodeDer(r, s);
     }
 
-    return _.leftPad(r.toString(16), 64) + _.leftPad(s.toString(16), 64);
+    return util.leftPad(r.toString(16), 64) + util.leftPad(s.toString(16), 64);
 }
 
 /**
  * 验签
  */
 function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
-    let hashHex = typeof msg === 'string' ? _.parseUtf8StringToHex(msg) : _.buf2Hex(msg);
+    let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.buf2Hex(msg);
     if(!typeof signHex === 'string')
-        signHex = _.buf2Hex(signHex)
+        signHex = util.buf2Hex(signHex)
 
     if (hash) {
         // sm3杂凑
@@ -178,17 +178,17 @@ function doSm3Hash(hashHex, publicKey, userId) {
     let smDigest = new SM3Digest();
 
     let z = new SM3Digest().getZ(G, publicKey.substr(2, 128), userId);
-    let zValue = _.hexToArray(_.arrayToHex(z).toString());
+    let zValue = util.hexToArray(util.arrayToHex(z).toString());
 
     let p = hashHex;
-    let pValue = _.hexToArray(p);
+    let pValue = util.hexToArray(p);
 
     let hashData = new Array(smDigest.getDigestSize());
     smDigest.blockUpdate(zValue, 0, zValue.length);
     smDigest.blockUpdate(pValue, 0, pValue.length);
     smDigest.doFinal(hashData, 0);
 
-    return _.arrayToHex(hashData).toString();
+    return util.arrayToHex(hashData).toString();
 }
 
 /**
@@ -196,8 +196,8 @@ function doSm3Hash(hashHex, publicKey, userId) {
  */
 function getPublicKeyFromPrivateKey(privateKey) {
     let PA = G.multiply(new BigInteger(privateKey, 16));
-    let x = _.leftPad(PA.getX().toBigInteger().toString(16), 64);
-    let y = _.leftPad(PA.getY().toBigInteger().toString(16), 64);
+    let x = util.leftPad(PA.getX().toBigInteger().toString(16), 64);
+    let y = util.leftPad(PA.getY().toBigInteger().toString(16), 64);
     return '04' + x + y;
 }
 
@@ -205,7 +205,7 @@ function getPublicKeyFromPrivateKey(privateKey) {
  * 获取椭圆曲线点
  */
 function getPoint() {
-    let keypair = _.generateKeyPairHex();
+    let keypair = util.generateKeyPairHex();
     let PA = curve.decodePointHex(keypair.publicKey);
 
     keypair.k = new BigInteger(keypair.privateKey, 16);
@@ -215,15 +215,15 @@ function getPoint() {
 };
 
 module.exports = {
-    generateKeyPairHex: _.generateKeyPairHex,
+    generateKeyPairHex: util.generateKeyPairHex,
     doEncrypt,
     doDecrypt,
     doSignature,
     doVerifySignature,
     getPoint,
-    compress: _.compress,
-    getPKFromSK: _.getPKFromSK,
-    deCompress: _.deCompress,
+    compress: util.compress,
+    getPKFromSK: util.getPKFromSK,
+    deCompress: util.deCompress,
     C1C2C3: C1C2C3,
     C1C3C2: 1
 };

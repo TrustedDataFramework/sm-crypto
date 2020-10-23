@@ -1,0 +1,1 @@
+export default function(str: string | Uint8Array | ArrayBuffer | number[]): string

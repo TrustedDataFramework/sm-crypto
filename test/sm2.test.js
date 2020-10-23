@@ -13,6 +13,17 @@ const TEST_SK = 'f00df601a78147ffe0b84de1dffbebed2a6ea965becd5d0bd7faf54f1f29c6b
 const DE_COMPRESSED = '04b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd509360cb8e50437a9109cca8b384b499fbb84290b7bcbf4d9ceec33bd829224bc995e'
 const COMPRESSED = '02b507fe1afd0cc7a525488292beadbe9f143784de44f8bc1c991636509fd50936'
 
+function bin2str(s){
+    if(typeof s === 'string')
+        return s
+    if(Array.isArray(s))
+        s = new Uint8Array(s)
+    if(typeof TextEncoder === 'function')
+        return new TextEncoder().encode(s)
+    if(typeof Buffer === 'function')
+        return Buffer.from(s).toString('utf-8')
+}
+
 beforeAll(() => {
     // 生成密钥对
     let keypair = sm2.generateKeyPairHex();
@@ -30,13 +41,13 @@ test('encrypt and decrypt data', () => {
     let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode);
     let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode);
 
-    expect(decryptData).toBe(msgString);
+    expect(bin2str(decryptData)).toBe(msgString);
 
     for (let i = 0; i < 100; i++) {
         let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode);
         let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode);
 
-        expect(decryptData).toBe(msgString);
+        expect(bin2str(decryptData)).toBe(msgString);
     }
 });
 
@@ -123,12 +134,18 @@ test('compress', () => {
 
 
 test('deCompress', () => {
-    expect(sm2.deCompress(COMPRESSED)).toBe(DE_COMPRESSED)
+    let i = 0
+    sks.forEach(sk => {
+        const pk = sm2.getPKFromSK(sk)
+        const decompressed = sm2.deCompress(compressedPKS[i])
+        expect(decompressed).toBe(pk);
+        i++;
+    })
 })
 
 test('sign with user-id', () => {
     console.log('sig =' + sm2.doSignature('123', TEST_SK, {userId: 'userid@soie-chain.com', der: false, hash: true}))
-    console.log('sig =' + sm2.doSignature(['1', '2', '3'].map(x => x.charCodeAt(0)), TEST_SK, {userId: 'userid@soie-chain.com', der: false, hash: true}))
+    console.log('sig =' + sm2.doSignature(new Uint8Array(['1', '2', '3'].map(x => x.charCodeAt(0))), TEST_SK, {userId: 'userid@soie-chain.com', der: false, hash: true}))
 })
 
 test('verifySign', () => {

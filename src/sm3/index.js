@@ -209,6 +209,8 @@ function CF(V, Bi) {
 }
 
 function buf2Binary(buf){
+    if(Array.isArray(buf))
+        buf = new Uint8Array(buf)
     buf = (buf instanceof ArrayBuffer) ? new Uint8Array(buf) : buf;
     let ret = ''
     for(let i = 0; i < buf.length; i++){

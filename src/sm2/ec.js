@@ -1,4 +1,4 @@
-const { BigInteger } = require('jsbn');
+const { BigInteger } = require('../lib/jsbn');
 
 /**
  * thanks for Tom Wu : http://www-cs-students.stanford.edu/~tjw/jsbn/
@@ -314,4 +314,5 @@ class ECCurveFp {
 module.exports = {
     ECPointFp,
     ECCurveFp,
+    ECFieldElementFp
 };

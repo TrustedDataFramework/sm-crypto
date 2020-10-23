@@ -157,7 +157,7 @@ function sm4(inArray, key, cryptFlag) {
         point += BLOCK;
     }
 
-    return outArray;
+    return new Uint8Array(outArray);
 }
 
 module.exports = {

@@ -1,4 +1,4 @@
-const { BigInteger } = require('jsbn');
+const { BigInteger } = require('../lib/jsbn');
 
 function bigIntToMinTwosComplementsHex(bigIntegerValue) {
     let h = bigIntegerValue.toString(16);

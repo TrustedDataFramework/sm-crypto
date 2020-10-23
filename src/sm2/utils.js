@@ -1,51 +1,68 @@
-const { BigInteger, SecureRandom } = require('jsbn');
-const { ECCurveFp } = require('./ec');
-const Buffer = require('safe-buffer').Buffer
-const _BigInteger = require('bigi')
+const { BigInteger, SecureRandom } = require('../lib/jsbn');
+const { ECCurveFp, ECFieldElementFp } = require('./ec');
 let rng = new SecureRandom();
 let { curve, G, n } = generateEcparam();
-const ecurve = require('ecurve');
-const Curve = ecurve.Curve;
-const GLOBAL = this;
 
-const CURVE_PARAMS = {
-    "p": "fffffffeffffffffffffffffffffffffffffffff00000000ffffffffffffffff",
-    "a": "fffffffeffffffffffffffffffffffffffffffff00000000fffffffffffffffc",
-    "b": "28e9fa9e9d9f5e344d5a9e4bcf6509a7f39789f515ab8f92ddbcbd414d940e93",
-    "n": "fffffffeffffffffffffffffffffffff7203df6b21c6052b53bbf40939d54123",
-    "h": "01",
-    "Gx": "32c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7",
-    "Gy": "bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
+const THREE = new BigInteger('3');
+
+function hexToInt(x) {
+    if (48 <= x && x <= 57) return x - 48;
+    if (97 <= x && x <= 102) return x - 87;
+    if (65 <= x && x <= 70) return x - 55;
+    return 0;
 }
 
-const CURVE = new Curve(
-    new _BigInteger(CURVE_PARAMS.p, 16),
-    new _BigInteger(CURVE_PARAMS.a, 16),
-    new _BigInteger(CURVE_PARAMS.b, 16),
-    new _BigInteger(CURVE_PARAMS.Gx, 16),
-    new _BigInteger(CURVE_PARAMS.Gy, 16),
-    new _BigInteger(CURVE_PARAMS.n, 16),
-    new _BigInteger(CURVE_PARAMS.h, 16)
-);
+
+function hex2Bin(s){
+    if(s instanceof Uint8Array)
+        return s
+    if(s instanceof ArrayBuffer || Array.isArray(s))
+        return new Uint8Array(s)
+    if(typeof s !== 'string')
+        throw new Error('invalid type')
+    if(s.startsWith('0x'))
+        s = s.slice(2)
+    if(typeof Buffer === 'function')
+        return Buffer.from(s, 'hex')
+    if(s.length % 2 !== 0)
+        throw new Error('invalid hex ' + s)
+
+    const ret = new Uint8Array(s.length / 2)
+    for (let i = 0; i < s.length / 2; i++) {
+        const h = s.charCodeAt(i * 2);
+        const l = s.charCodeAt(i * 2 + 1);
+        ret[i] = (hexToInt(h) << 4) + hexToInt(l);
+    }
+    return ret;
+}
 
 function compress(publicKey) {
     if (publicKey.slice(0, 2) !== '04')
         return publicKey;
-    let P = ecurve.Point.decodeFrom(CURVE, Buffer.from(publicKey, 'hex'))
-    return P.getEncoded(true).toString('hex')
+    const b = hex2Bin(publicKey)
+    const x = publicKey.slice(2, 2 + 64)
+    return (b[b.length - 1] & 1 ? '03' : '02') + x
 }
 
 
 function deCompress(pk) {
     if (pk.slice(0, 2) === '04')
-        return pk;
+        return pk
 
-    return '04' +
-        pk.slice(2) +
-        ecurve.Point
-            .decodeFrom(CURVE, Buffer.from(pk, "hex"))
-            .affineY.toBuffer(32).toString('hex')
+    const x = pk.slice(2)
+    const xBig = new BigInteger(x, 16)
+
+    const p14 = curve.q.add(BigInteger.ONE).divide(new BigInteger('4'))
+    const alpha = xBig.pow(THREE).add(curve.a.x.multiply(xBig)).add(curve.b.x).mod(curve.q)
+    let beta = alpha.modPow(p14, curve.q)
+    if(pk.slice(0, 2) === '03')
+        beta = curve.q.subtract(beta)
+    let yHex = beta.toString(16)
+    while (yHex.length < 64)
+        yHex = '0' + yHex
+    return '04' + bin2hex(x) + yHex
 }
+
 
 /**
  * 获取公共椭圆曲线
@@ -114,25 +131,20 @@ function parseUtf8StringToHex(input) {
     return hexChars.join('');
 }
 
-/**
- * 解析arrayBuffer到16进制字符串
- */
-function parseArrayBufferToHex(input) {
-    return Array.prototype.map.call(new Uint8Array(input), x => ('00' + x.toString(16)).slice(-2)).join('');
-}
-
-
-function buf2Hex(input){
+function bin2hex(input){
+    if(typeof input === 'string')
+        return input
     if(
         !(input instanceof ArrayBuffer) &&
         !(input instanceof Uint8Array) &&
-        !(GLOBAL && GLOBAL['Buffer'] && input instanceof GLOBAL['Buffer']) &&
-        !(input instanceof Array)
+        !Array.isArray(input)
     )
         throw new Error("input " + input + " is not ArrayBuffer Uint8Array or Buffer and other array-like ")
-    if(input instanceof ArrayBuffer)
+    if(!input instanceof Uint8Array)
         input = new Uint8Array(input)
     // input maybe Buffer or Uint8Array
+    if(typeof Buffer === 'function')
+        return Buffer.from(input).toString('hex')
     return Array.prototype.map.call(input, x => ('00' + x.toString(16)).slice(-2)).join('');
 }
 
@@ -221,12 +233,18 @@ function getPKFromSK(privateKey) {
     return '04' + x + y;
 }
 
+function str2Bin(str){
+    if(typeof Buffer === 'function')
+        return Buffer.from(str, 'utf-8')
+    if(typeof TextEncoder === 'function')
+        return new TextEncoder().encode(str)
+}
+
 module.exports = {
     getGlobalCurve,
     generateEcparam,
     generateKeyPairHex,
     parseUtf8StringToHex,
-    parseArrayBufferToHex,
     leftPad,
     arrayToHex,
     arrayToUtf8,
@@ -234,5 +252,7 @@ module.exports = {
     compress,
     getPKFromSK,
     deCompress,
-    buf2Hex
-};
+    bin2Hex: bin2hex,
+    hex2Bin: hex2Bin,
+    str2Bin: str2Bin
+}

@@ -21,11 +21,6 @@
     "testURL": "https://jest.test"
   },
   "license": "MIT",
-  "dependencies": {
-    "jsbn": "^1.1.0",
-    "bigi": "^1.4.2",
-    "ecurve": "^1.0.6"
-  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
