@@ -43,7 +43,7 @@ function doEncrypt(msg, publicKey, cipherMode = 1) {
  */
 function doDecrypt(encryptData, privateKey, cipherMode = 1) {
     let cipher = new SM2Cipher();
-
+    privateKey = util.bin2Hex(privateKey)
     privateKey = new BigInteger(privateKey, 16);
     if(encryptData.substr(0, 2) === '04')
         encryptData = encryptData.substr(2, encryptData.length - 2)
@@ -85,8 +85,7 @@ function doDecrypt(encryptData, privateKey, cipherMode = 1) {
  *
  */
 function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId } = {}) {
-    if(typeof privateKey !== 'string')
-        privateKey = util.bin2Hex(privateKey)
+    privateKey = util.bin2Hex(privateKey)
 
     let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
 
@@ -135,6 +134,7 @@ function doSignature(msg, privateKey, { pointPool, der, hash, publicKey, userId 
  */
 function doVerifySignature(msg, signHex, publicKey, { der, hash, userId } = {}) {
     let hashHex = typeof msg === 'string' ? util.parseUtf8StringToHex(msg) : util.bin2Hex(msg);
+    publicKey = util.bin2Hex(publicKey)
     if(typeof signHex !== 'string')
         signHex = util.bin2Hex(signHex)
 
